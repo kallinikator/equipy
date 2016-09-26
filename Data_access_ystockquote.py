@@ -80,10 +80,10 @@ def get_fundamental_data(stock: str) -> dict:
     
 
 if __name__ == "__main__":
-    result = get_price_data("GSPC", "2013-01-03", "2013-01-08")
-    print(result)
-    result = get_fundamental_data("MYR")
-    print(result)
+    result = get_price_data("MYR", "2013-01-03", "2013-01-08", "2013-02-08")
+    #print(result)
+    #result = get_fundamental_data("MYR")
+    #print(result)
 
 
 

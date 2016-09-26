@@ -8,11 +8,10 @@ from Yahoo import query
 
 class Stock(object):
     """
-    Base class for stck objects. Inheritants contain specifications depending on your data-source.
+    Base class for stock objects. Inheritants contain specifications depending on your data-source.
     """
     def __init__(self):   
         self.score = 0
-        self.name = ""
 
     # Only some misc stuff
     def __repr__(self):
@@ -78,7 +77,8 @@ class Stock_Yahoo(Stock):
 
     def __init__(self, symbol, *args, **kwargs):
         super().__init__()
-        self.data = query(symbol)
+        self.data = query(symbol)["query"]["results"]["quote"]
+        self.name = symbol
 
 
 if __name__ == "__main__":

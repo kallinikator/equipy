@@ -5,11 +5,12 @@ This Module is created to backtest given strategies agains past courses.
 import datetime
 import Main
 import Supporter
+import pandas as pd
 
 from Data_access_ystockquote import get_price_data
 
 
-def backtest(ref, *args, **kwargs):
+def backtest(ref, *args):
     """
     Tests if your investment idea works. You need to enter at least one reference (more not implemented yet)
     and it you can set a timerange (int, a day each) by the keyword timerange
@@ -24,6 +25,17 @@ def backtest(ref, *args, **kwargs):
     Supporter.show_values(reference["High"])
 
 
+def backtest_stockpup(ref, *args):
+    """
+    Tests if your investment idea works. You need to enter at least one reference (more not implemented yet)
+    and it you can set a timerange (int, a day each) by the keyword timerange
+    """
+    date = datetime.date.today()
+    datelist = pd.date_range(pd.datetime.today(), periods=100).tolist()
+    start = date - timeline
+    reference = get_price_data(ref, start.isoformat(), date.isoformat())
+    Supporter.show_values(reference["High"])
+
+
 if __name__ == "__main__":
-    backtest("GSPC", timerange = 100)
-    backtest("AAPL")
+    backtest_stockpup("GSPC", timerange = 100)
