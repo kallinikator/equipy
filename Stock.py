@@ -43,6 +43,9 @@ class Stock_Stockpup(Stock):
         # Calculation of the standard deviation
         self.data["Standard Deviation"] = self.data["Value"].std()
 
+    def __len__(self):
+        return len(self.data.index)
+
     def generate_category(self, category):
         for value in self.data[category]:
             yield value
