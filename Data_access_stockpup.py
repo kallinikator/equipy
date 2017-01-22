@@ -2,38 +2,25 @@ import requests
 import bs4
 import os
 import re
-import sys
 
 
-URL = "http://www.stockpup.com/"
-FILENAME = re.compile(r"([A-Za-z_]+).csv")
-PATH = os.getcwd()
+def get_fundamentals(*args, **kwargs):
+    base_url = "http://www.stockpup.com/data/"
 
-#@Supporter.myLogger
-def crawl_data(PATH):
-    
-    if not os.path.exists("Stockpup"):
-        os.makedirs("Stockpup")
-    PATH = os.path.join(PATH, "Stockpup")
-    print(PATH)
-        
-    with requests.Session() as crawlsession:
-        
-        page = crawlsession.get(URL + r"data/")
-        tree = bs4.BeautifulSoup(page.content, "lxml")
-     
-        for link in tree.findAll("a", href = True):
-            link = link.get("href")
-            
-            if ".csv" in link:
-                Filename = re.search(FILENAME, link).group(1)    
-                filepath = os.path.join(PATH, Filename)
-                if not os.path.exists(filepath):
-                    os.makedirs(filepath)     
-                csv = crawlsession.get(URL + link)
-                with open(os.path.join(filepath, Filename) + r".csv", "w") as myfile:
-                    myfile.write(csv.content.decode("utf-8"))
-                print(link + " downloaded")
+    session = requests.Session()
+
+    site = bs4.BeautifulSoup(session.get(base_url).content, "lxml")
+
+    if not os.path.exists("Stock_Data"):
+        os.mkdir("Stock_Data")
+
+    for link in site.findAll(name="a", text="CSV"):
+        filename = os.path.join("Stock_Data", re.match(r"/data/([A-Z]+)", link["href"]).group(1) + ".csv")
+        with open(filename, "w") as file:
+            csv = session.get("http://www.stockpup.com" + link["href"])
+            file.write(csv.text)
+            print("write {}".format(filename))
+
 
 if __name__ == "__main__":
-    crawl_data(PATH)
+    get_fundamentals()

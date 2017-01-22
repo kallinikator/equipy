@@ -12,6 +12,8 @@ import Stock
   
 from Data_access_ystockquote import get_price_data #For backtesting one
 
+# TODO deal with wrong or incomplete data
+
 class Portfolio(object):
     """
     Creates the optimal portfolio from a given universe of stocks. This is a base class for all kind of freely
