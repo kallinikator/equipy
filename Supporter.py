@@ -1,8 +1,3 @@
-"""
-This Module is made to provide useful Stuff to the other modules
-"""
-
-import re
 import logging
 import time
 import pandas
@@ -11,15 +6,31 @@ import matplotlib.pyplot as plt
 
 
 def myLogger(func):
-    """Will create a logfile which will track all taken args and quargs and infos of modules"""
+    """Will create a logfile which will track all taken args and kwargs and infos of modules"""
     logging.basicConfig(filename="{}.log".format(func.__name__), level=logging.INFO)
     
     def wrapper(*args,**kwargs):
         logging.info("Args: {}, Kwargs: {}".format(args, kwargs))
         return func(*args,**kwargs)
     return wrapper
-     
-   
+
+
+def portfolio_analyser(func):
+    """
+    This Function is used to explain changes in portfoliovalues by tracking all kind of input.
+    Furthermore, this function is used to calculate the most popular risk measurements.
+    """
+    def wrapper(*args, **kwargs):
+        with open("outputfile.txt", "w") as file:
+            for arg in args:
+                file.write("{}\n".format(str(arg)))
+            for kw, arg in kwargs:
+                file.write("{} : {}\n".format(str(kw), str(arg)))
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 def myTimer(func):
     """Is used to measure the time needed. Useful for performance testing"""
     def wrapper(*args,**kwargs):
@@ -30,15 +41,11 @@ def myTimer(func):
     return wrapper
 
 
-def show_values(obj, *args):
+def show_values(values):
     """Shows a passed Dataframe. You can specify which rows to show by passing args"""  
     plt.style.use("ggplot")
-    if args:
-        tempobj = pandas.DataFrame()
-        for arg in args: 
-            tempobj[arg] = obj[arg]
-        obj = tempobj                
-    obj.plot()
+    plt.title("Result")
+    values.plot()
     plt.show()
 
 

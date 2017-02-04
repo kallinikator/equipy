@@ -1,41 +1,57 @@
-"""
-This Module is created to backtest given strategies agains past courses.
-"""
-
-import datetime
+import Portfolio
 import Main
 import Supporter
-import pandas as pd
-
-from Data_access_ystockquote import get_price_data
 
 
-def backtest(ref, *args):
-    """
-    Tests if your investment idea works. You need to enter at least one reference (more not implemented yet)
-    and it you can set a timerange (int, a day each) by the keyword timerange
-    """
-    date = datetime.date.today()
-    if "timerange" in kwargs:
-        timeline = datetime.timedelta(kwargs["timerange"])
-    else:
-        timeline = datetime.timedelta(200) #Default value
-    start = date - timeline
-    reference = get_price_data(ref, start.isoformat(), date.isoformat())
-    Supporter.show_values(reference["High"])
+class Backtester(object):
 
+    def __init__(self, portfolio):
+        self.portfolio = portfolio(Main.MyFirstStrategy)
 
-def backtest_stockpup(ref, *args):
-    """
-    Tests if your investment idea works. You need to enter at least one reference (more not implemented yet)
-    and it you can set a timerange (int, a day each) by the keyword timerange
-    """
-    date = datetime.date.today()
-    datelist = pd.date_range(pd.datetime.today(), periods=100).tolist()
-    start = date - timeline
-    reference = get_price_data(ref, start.isoformat(), date.isoformat())
-    Supporter.show_values(reference["High"])
+    def __repr__(self):
+        return "An instance of a Backtester"
+
+    def calculate_portfolio_value(self, *args, money=100000):
+        """ This function creates the finals portfolio value if a given portfolio would have been used. """
+        if "equalweight" in args:
+            self.portfolio.create_equal_reference()
+        else:
+            self.portfolio.calculate(*args)
+
+        value_of_portfolio = [money]
+
+        # This line unpacks and creates the initial portfolio
+        stocks = {stock: (position[0] * money) / position[1] for
+                  stock, position in self.portfolio.positionlist[-1].items()}
+
+        # Then, I iterate through the following lines. After updating the money, a new portfolio is created.
+        for step in reversed(self.portfolio.positionlist[:-1]):
+            #print(len(stocks),len(step), self.portfolio.strategy.length)
+            assert len(stocks) == len(step) == self.portfolio.strategy.length
+            money = 0
+            for stock, position in step.items():
+                money += stocks[stock] * position[1]
+
+            value_of_portfolio.append(money)
+            stocks = {}
+            for stock, position in step.items():
+                stocks[stock] = (position[0] * money) / position[1]
+
+        print("Portfolio Values created!")
+        return value_of_portfolio
 
 
 if __name__ == "__main__":
-    backtest_stockpup("GSPC", timerange = 100)
+    import pandas
+
+    backtest = Backtester(Portfolio.Portfolio)
+    result = pandas.DataFrame()
+    result["ba"] = backtest.calculate_portfolio_value("borders", "allow_short")
+    result["fa"] = backtest.calculate_portfolio_value("floating", "allow_short")
+    result["n"] = backtest.calculate_portfolio_value("equalweight")
+    print(result)
+
+    Supporter.show_values(result)
+
+# TODO write a proper documentation
+# TODO Other flags

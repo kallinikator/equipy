@@ -10,6 +10,7 @@ class Stock(object):
     """
     def __init__(self):   
         self.score = 0
+        self.complete_pricelist = True
 
     def __repr__(self):
         return "A Share-Object of {}, its score is {}.".format(self.name, self.score)
@@ -23,6 +24,7 @@ class Stock(object):
     def __ge__(self, other):
         return self.score >= other.score
 
+
 class Stock_Stockpup(Stock):
     """
     Creates a share-object from the data from stockpup. This object can calculate
@@ -35,20 +37,19 @@ class Stock_Stockpup(Stock):
         self.data = pd.read_csv(open(r"Stock_Data/{}.csv".format(symbol)))
         self.data = self.data.apply(pd.to_numeric, errors="ignore")
         self.data.index = self.data["Quarter end"]
-        self.data["Value"] = self.data["Price"] + self.data["Cumulative dividends per share"]
         self.name = symbol
 
-        # Calculation of the estimated return 
-        self.data["Estimated Return"] = self.data["Value"].pct_change()
-        # Calculation of the standard deviation
-        self.data["Standard Deviation"] = self.data["Value"].std()
+        if self.data["Price"].dtype in (int, float) and self.data["Cumulative dividends per share"].dtype in (int, float):
+            self.data["Value"] = self.data["Price"] + self.data["Cumulative dividends per share"]
+            # Calculation of the estimated return
+            self.data["Estimated Return"] = self.data["Value"].pct_change()
+            # Calculation of the standard deviation
+            self.data["Standard Deviation"] = self.data["Value"].std()
+        else:
+            self.complete_pricelist = False
 
     def __len__(self):
         return len(self.data.index)
-
-    def generate_category(self, category):
-        for value in self.data[category]:
-            yield value
 
 
 class Stock_Yahoo(Stock):
@@ -63,5 +64,7 @@ class Stock_Yahoo(Stock):
 
 
 if __name__ == "__main__":
-    n = ["ROE", "Revenue", "Earnings", "Equity to assets ratio", "P/E ratio", "Price", "EPS basic"]
-    Y = Stock_Stockpup("AAPL")
+    Y = Stock_Stockpup("AA")
+
+    # TODO Unittest
+    # TODO Too short or too incomplete Information are ignored. Maybe I find a better way to gather them!
